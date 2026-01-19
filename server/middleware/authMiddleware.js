@@ -1,27 +1,33 @@
 const jwt = require('jsonwebtoken');
 
-// 1. Verify if the user has a valid Token
-const verifyToken = (req, res, next) => {
+exports.verifyToken = (req, res, next) => {
   const token = req.header('Authorization');
-  if (!token) return res.status(401).json({ error: 'Access Denied: No Token Provided' });
+  if (!token) return res.status(401).json({ error: "Access Denied" });
 
   try {
-    // Remove "Bearer " if present and verify
-    const cleanToken = token.replace("Bearer ", "");
-    const verified = jwt.verify(cleanToken, process.env.JWT_SECRET);
-    req.user = verified; // Save user info to use in other routes
+    // Expecting "Bearer <token>" or just "<token>"
+    const tokenString = token.startsWith('Bearer ') ? token.slice(7) : token;
+    const verified = jwt.verify(tokenString, process.env.JWT_SECRET);
+    req.user = verified;
     next();
   } catch (err) {
-    res.status(400).json({ error: 'Invalid Token' });
+    res.status(400).json({ error: "Invalid Token" });
   }
 };
 
-// 2. Verify if the user is an Admin
-const isAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Access Denied: You are not an Admin' });
+exports.isAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ error: "Access denied. Admins only." });
   }
-  next();
 };
 
-module.exports = { verifyToken, isAdmin };
+// --- ADD THIS FUNCTION ---
+exports.isStoreOwner = (req, res, next) => {
+  if (req.user && (req.user.role === 'store_owner' || req.user.role === 'owner')) {
+    next();
+  } else {
+    res.status(403).json({ error: "Access denied. Store Owners only." });
+  }
+};

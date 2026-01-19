@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 
-// Validation Schema (As per requirements)
+// Validation Schema
 const signupSchema = Joi.object({
   name: Joi.string().min(20).max(60).required(),
   email: Joi.string().email().required(),
@@ -12,7 +12,9 @@ const signupSchema = Joi.object({
     .pattern(new RegExp('^(?=.*[A-Z])(?=.*[!@#$&*])'))
     .required(),
   address: Joi.string().max(400).optional(),
-  role: Joi.string().valid('user', 'store_owner').default('user')
+  
+  // FIXED: Changed 'store_owner' to 'owner' to match your User.js model
+  role: Joi.string().valid('user', 'owner').default('user')
 });
 
 exports.signup = async (req, res) => {
@@ -29,7 +31,7 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ error: "Email already exists" });
     }
 
-    // 3. Hash Password (Security Best Practice)
+    // 3. Hash Password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 4. Create User
@@ -41,7 +43,7 @@ exports.signup = async (req, res) => {
       role: role || 'user'
     });
 
-    // 5. Generate Token (So they are logged in immediately)
+    // 5. Generate Token
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
@@ -55,8 +57,6 @@ exports.signup = async (req, res) => {
     res.status(500).json({ error: "Server error during signup" });
   }
 };
-
-// ... existing imports and signup code ...
 
 exports.login = async (req, res) => {
   try {
@@ -96,5 +96,36 @@ exports.login = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error during login" });
+  }
+};
+
+// This function was missing in your original setup, but correctly added here.
+exports.changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.user.id; // Comes from verifyToken middleware
+
+    // 1. Validate Strength (Assignment Requirement)
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9]).{8,16}$/;
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({ error: "Password must be 8-16 chars, 1 Upper, 1 Special" });
+    }
+
+    // 2. Find User & Check Old Password
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) return res.status(400).json({ error: "Incorrect old password" });
+
+    // 3. Update Password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
 };
