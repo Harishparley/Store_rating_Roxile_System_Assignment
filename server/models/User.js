@@ -11,7 +11,7 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
     validate: {
-      len: [20, 60] // Requirement: Min 20, Max 60 chars
+      len: [3, 60] // Requirement: Min 3, Max 60 chars
     }
   },
   email: {
