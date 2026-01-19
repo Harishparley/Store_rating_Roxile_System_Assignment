@@ -1,8 +1,10 @@
 const dns = require('node:dns');
 dns.setDefaultResultOrder('ipv4first');
 
-const authRoutes = require('./routes/authRoutes');
-const storeRoutes = require('./routes/storeRoutes');
+app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/stores', require('./routes/storeRoutes')); 
+app.use('/api/auth', require('./routes/authRoutes'));
+
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -17,6 +19,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/stores', storeRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Test Route
 app.get('/', (req, res) => {
