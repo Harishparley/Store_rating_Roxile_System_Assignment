@@ -1,17 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const storeController = require('../controllers/storeController');
-const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
+const { verifyToken, isAdmin, isStoreOwner } = require('../middleware/authMiddleware'); 
 
 
-// POST /api/stores/add
-// We protect this route: User must be Logged In (verifyToken) AND be Admin (isAdmin)
 router.post('/add', verifyToken, isAdmin, storeController.addStore);
+
+router.get('/', verifyToken, storeController.getAllStores); 
+
 router.post('/rate', verifyToken, storeController.addRating);
 
-// GET /api/stores
-// Public route (anyone can see stores) OR protected (verifyToken)
-// The requirement implies users should see stores to rate them.
-router.get('/', verifyToken, storeController.getAllStores); 
+router.get('/dashboard', verifyToken, isStoreOwner, storeController.getOwnerDashboard);
 
 module.exports = router;
