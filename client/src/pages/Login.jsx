@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Added Link import
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,12 +15,25 @@ const Login = () => {
         email,
         password,
       });
+
+      // 1. Save Token & User Data
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
-      navigate("/dashboard");
-      window.location.reload();
+
+      // 2. Role-Based Redirection
+      // If they are an owner, go to the Owner Dashboard
+      if (res.data.user.role === 'owner' || res.data.user.role === 'store_owner') {
+        navigate("/owner/dashboard");
+      } else {
+        // Admins and Normal Users go to the main Dashboard
+        navigate("/dashboard");
+      }
+
+      // Optional: specific reload if your App.js doesn't detect the login immediately
+      // window.location.reload(); 
+      
     } catch (err) {
-      setError("Invalid email or password");
+      setError(err.response?.data?.error || "Invalid email or password");
     }
   };
 
@@ -40,7 +53,7 @@ const Login = () => {
             type="email"
             placeholder="Email"
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded"
+            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -48,29 +61,30 @@ const Login = () => {
             type="password"
             placeholder="Password"
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded"
+            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <button
             type="submit"
-            className="w-full py-2 font-semibold text-white bg-blue-600 rounded hover:bg-blue-700"
+            className="w-full py-2 font-semibold text-white bg-blue-600 rounded hover:bg-blue-700 transition duration-200"
           >
             Login
           </button>
         </form>
- <div className="text-center mt-4">
-        <p className="text-sm text-gray-600">
-          Don't have an account?{" "}
-          <a href="/signup" className="text-blue-600 hover:underline">
-            Sign up
-          </a>
-        </p>
-      </div>
 
+        <div className="text-center mt-4">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{" "}
+            {/* UPDATED: Used Link instead of <a> for smoother navigation */}
+            <Link to="/signup" className="text-blue-600 hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
-     
     </div>
   );
 };
+
 export default Login;
