@@ -1,11 +1,11 @@
 const { Sequelize } = require('sequelize');
 
-// --- OFFLINE MODE (SQLite) ---
-// We use this for development so we don't need internet.
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: './database.sqlite', // This creates a file in your project folder
-  logging: false
+
+const sequelize = new Sequelize('store_rating', 'root', '', {
+  host: 'localhost',
+  port: 3307, 
+  dialect: 'mysql',
+  logging: false,
 });
 
 module.exports = sequelize;

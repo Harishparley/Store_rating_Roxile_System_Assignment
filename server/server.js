@@ -1,42 +1,36 @@
-const dns = require('node:dns');
-dns.setDefaultResultOrder('ipv4first');
-
-app.use('/api/admin', require('./routes/adminRoutes'));
-app.use('/api/stores', require('./routes/storeRoutes')); 
-app.use('/api/auth', require('./routes/authRoutes'));
-
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const sequelize = require('./config/db');
+const { sequelize } = require('./models');
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/api/auth', authRoutes);
-app.use('/api/stores', storeRoutes);
-app.use('/api/admin', adminRoutes);
 
-// Test Route
-app.get('/', (req, res) => {
-  res.send('API is working!');
-});
+// Routes
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/stores', require('./routes/storeRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
-// Database Connection & Server Start
+// ... imports
+
+// Database Connection
 sequelize.authenticate()
   .then(() => {
-    console.log('Database connected...');
-    return sequelize.sync(); // This creates tables if they don't exist
+    console.log('✅ Connected to MySQL Database.');
+    
+    // 👇 EMPTY BRACKETS () mean: "If table exists, DO NOT TOUCH IT."
+    return sequelize.sync(); 
   })
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   })
   .catch(err => {
-    console.log('Error: ' + err);
+    console.error('❌ Database Error:', err);
   });
