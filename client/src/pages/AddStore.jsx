@@ -3,113 +3,38 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const AddStore = () => {
+  const [formData, setFormData] = useState({ name: '', address: '', email: '', ownerEmail: '' });
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',    // The public email displayed for the store
-    address: '',
-    ownerEmail: '' // The email of the User who owns this store (REQUIRED)
-  });
-  const [error, setError] = useState('');
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    
     try {
-      const token = localStorage.getItem('token');
-      // Send the data to the backend
       await axios.post('http://localhost:5000/api/stores/add', formData, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      
-      alert("Store Created Successfully!");
-      // If successful, go back to dashboard
       navigate('/dashboard');
-    } catch (err) {
-      // Show specific error from backend (e.g. "Owner not found")
-      setError(err.response?.data?.error || 'Failed to add store');
-    }
+    } catch (err) { alert(err.response?.data?.error || "Error adding store"); }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-lg p-8 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Add New Store</h2>
-        
-        {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded border border-red-200">{error}</div>}
-
+    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center">
+      <div className="w-full max-w-lg bg-white p-8 rounded-2xl shadow-2xl">
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Add New Store</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Store Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Store Name</label>
-            <input 
-              type="text" name="name" required
-              minLength={20} maxLength={60} // Requirement: 20-60 Chars
-              className="w-full mt-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-              value={formData.name} onChange={handleChange}
-              placeholder="Min 20 characters..."
-            />
-            <p className="text-xs text-gray-400 mt-1">Must be between 20 and 60 characters.</p>
+          <input className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none" placeholder="Store Name" required onChange={e => setFormData({...formData, name: e.target.value})} />
+          <input className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none" placeholder="Address" required onChange={e => setFormData({...formData, address: e.target.value})} />
+          <input className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none" placeholder="Public Email (Optional)" onChange={e => setFormData({...formData, email: e.target.value})} />
+          <div className="border-t border-gray-100 pt-4">
+             <label className="text-xs text-gray-500 uppercase font-bold">Link Store Owner</label>
+             <input className="w-full border border-gray-300 p-3 rounded-lg mt-1 focus:ring-2 focus:ring-purple-500 outline-none" placeholder="Owner's User Email" required onChange={e => setFormData({...formData, ownerEmail: e.target.value})} />
           </div>
-
-          {/* Store Public Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Store Public Email</label>
-            <input 
-              type="email" name="email" required
-              className="w-full mt-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-              value={formData.email} onChange={handleChange}
-            />
-          </div>
-
-          {/* Store Address */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Address</label>
-            <textarea 
-              name="address" required rows="3"
-              maxLength={400} // Requirement: Max 400 Chars
-              className="w-full mt-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-              value={formData.address} onChange={handleChange}
-            ></textarea>
-             <p className="text-xs text-gray-400 mt-1">Max 400 characters.</p>
-          </div>
-
-          {/* Owner Email (New Field) */}
-          <div className="bg-purple-50 p-3 rounded border border-purple-100">
-            <label className="block text-sm font-bold text-purple-700">Store Owner's User Email</label>
-            <input 
-              type="email" name="ownerEmail" required
-              className="w-full mt-1 p-2 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500"
-              value={formData.ownerEmail} onChange={handleChange}
-              placeholder="Enter the email of the registered user who owns this"
-            />
-            <p className="text-xs text-purple-600 mt-1">This links the store to a user so they can see the dashboard.</p>
-          </div>
-
-          <div className="flex gap-4 mt-6">
-            <button 
-              type="submit" 
-              className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-bold"
-            >
-              Create Store
-            </button>
-            <button 
-              type="button" 
-              onClick={() => navigate('/dashboard')}
-              className="flex-1 bg-gray-200 text-gray-800 py-2 rounded hover:bg-gray-300"
-            >
-              Cancel
-            </button>
+          <div className="flex gap-4 pt-2">
+             <button type="button" onClick={() => navigate('/dashboard')} className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200">Cancel</button>
+             <button type="submit" className="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 shadow-md">Create Store</button>
           </div>
         </form>
       </div>
     </div>
   );
 };
-
 export default AddStore;
