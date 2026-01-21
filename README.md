@@ -25,7 +25,7 @@ A full-stack web application that allows users to search, view, and rate stores.
 
 - **Frontend:** React.js, Vite, Tailwind CSS, Axios
 - **Backend:** Node.js, Express.js
-- **Database:** SQLite (with Sequelize ORM)
+- **Database:** MySQL (via XAMPP) using Sequelize ORM
 - **Authentication:** JWT (JSON Web Tokens) with Role-Based Access Control
 
 ---
@@ -34,9 +34,9 @@ A full-stack web application that allows users to search, view, and rate stores.
 
 To set up the system and create other users/stores, login with the default Admin account:
 
-| **System Admin** | `admin@roxiler.com` | `Admin@123` |
+**Note:**For this you can run node create-admin.js command in root directory to create admin and then you can login with this email and passward
 
-> **Note:** If this account does not exist in your database yet, please manually update the `role` of your first registered user to `'admin'` in the `database.sqlite` file or Database GUI.
+| **System Admin** | `admin@roxiler.com` | `Admin@123` |
 
 ---
 
@@ -44,12 +44,18 @@ To set up the system and create other users/stores, login with the default Admin
 
 Follow these steps to run the project locally.
 
-### 1. Clone the Repository
+### 1. Prerequisites (MySQL Setup)
+1. Install and Open **XAMPP**.
+2. Start **Apache** and **MySQL**.
+3. Create a database named `store_rating` in phpMyAdmin or via terminal (`CREATE DATABASE store_rating;`).
+4. *Optional:* If using Port 3307, ensure `server/config/db.js` is updated to reflect that port.
+
+### 2. Clone the Repository
 ```bash
-git clone https://github.com/Harishparley/Store_rating_Roxile_System_Assignment
+git clone [https://github.com/Harishparley/Store_rating_Roxile_System_Assignment](https://github.com/Harishparley/Store_rating_Roxile_System_Assignment)
 cd store-rating-app
 
-2. Backend Setup (Server)
+3. Backend Setup (Server)
 Navigate to the server folder, install dependencies, and start the backend.
 
 Bash
@@ -67,7 +73,7 @@ Bash
 cd client
 npm install
 
-# Start the frontend (Runs on http://localhost:5173 or 3000)
+# Start the frontend (Runs on http://localhost:5173 )
 npm run dev
 Usage Guide
 Login as Admin (admin@roxiler.com).
@@ -85,8 +91,9 @@ Project Structure
   /src
     /pages       # Dashboard, Login, Signup, AddStore
     /components  # Reusable components
+
 /server          # Node.js Backend
+  /config        # Database Configuration (db.js)
   /controllers   # Logic for Auth, Admin, Stores
   /models        # Sequelize Database Models
   /routes        # API Routes
-  database.sqlite # Local Database File
